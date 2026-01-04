@@ -20,7 +20,8 @@ const cardSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   isPinned: { type: Boolean, default: false },
-  isImportant: { type: Boolean, default: false }
+  isImportant: { type: Boolean, default: false },
+  faceColor: { type: String, enum: ['purple', 'black', 'orange', 'yellow'], default: 'purple' }
 });
 
 const Card = mongoose.model('Card', cardSchema);
@@ -30,9 +31,10 @@ async function seedData() {
   const count = await Card.countDocuments();
   if (count === 0) {
     await Card.create([
-      { title: 'Modern Design', description: 'Experience the sleek and intuitive interface of our latest product.' },
-      { title: 'Powerful Performance', description: 'Under the hood, we use cutting-edge technology to ensure speed.' },
-      { title: 'Secure & Reliable', description: 'Your data is protected with industry-leading security standards.' }
+      { title: 'Modern Design', description: 'Experience the sleek and intuitive interface of our latest product.', faceColor: 'purple' },
+      { title: 'Powerful Performance', description: 'Under the hood, we use cutting-edge technology to ensure speed.', faceColor: 'black' },
+      { title: 'Secure & Reliable', description: 'Your data is protected with industry-leading security standards.', faceColor: 'orange' },
+      { title: 'User Friendly', description: 'Built with the user in mind, making complex tasks simple and intuitive.', faceColor: 'yellow' }
     ]);
     console.log('Seed data added');
   }

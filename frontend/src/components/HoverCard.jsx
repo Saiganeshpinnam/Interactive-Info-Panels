@@ -57,7 +57,7 @@ const HoverCard = ({ card, onContextMenu }) => {
       layout
     >
       <div className="p-6">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-xl font-bold text-gray-800">{card.title}</h3>

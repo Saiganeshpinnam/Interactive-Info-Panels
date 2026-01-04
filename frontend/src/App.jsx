@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import HoverCard from './components/HoverCard';
 import ContextMenu from './components/ContextMenu';
 import ViewModal from './components/ViewModal';
+import ImageCardsPanel from './components/FacesPanel';
 
 function App() {
   const [cards, setCards] = useState([]);
@@ -89,7 +90,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 pb-40">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
@@ -141,6 +142,8 @@ function App() {
           />
         )}
       </AnimatePresence>
+
+      <ImageCardsPanel />
     </div>
   );
 }
