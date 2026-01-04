@@ -21,12 +21,13 @@ const cardSchema = new mongoose.Schema({
   description: { type: String, required: true },
   isPinned: { type: Boolean, default: false },
   isImportant: { type: Boolean, default: false },
-  faceColor: { type: String, enum: ['purple', 'black', 'orange', 'yellow'], default: 'purple' }
+  faceColor: { type: String, enum: ['purple', 'black', 'orange', 'yellow'], default: 'purple' },
+  isDeleted: { type: Boolean, default: false }
 });
 
 const Card = mongoose.model('Card', cardSchema);
 
-// Seed data if empty
+// Seed data if empty or restore deleted cards
 async function seedData() {
   const count = await Card.countDocuments();
   if (count === 0) {
@@ -34,16 +35,36 @@ async function seedData() {
       { title: 'Modern Design', description: 'Experience the sleek and intuitive interface of our latest product.', faceColor: 'purple' },
       { title: 'Powerful Performance', description: 'Under the hood, we use cutting-edge technology to ensure speed.', faceColor: 'black' },
       { title: 'Secure & Reliable', description: 'Your data is protected with industry-leading security standards.', faceColor: 'orange' },
-      { title: 'User Friendly', description: 'Built with the user in mind, making complex tasks simple and intuitive.', faceColor: 'yellow' }
+      { title: 'User Friendly', description: 'Built with the user in mind, making complex tasks simple and intuitive.', faceColor: 'yellow' },
+       { title: 'User Friendly', description: 'Built with the user in mind, making complex tasks simple and intuitive.', faceColor: 'yellow' }
     ]);
     console.log('Seed data added');
+  } else {
+    // Restore any deleted cards on server restart
+    const result = await Card.updateMany({ isDeleted: true }, { isDeleted: false });
+    console.log(`Restored ${result.modifiedCount} deleted cards`);
+    
+    // Check if we have any non-deleted cards
+    const activeCount = await Card.countDocuments({ isDeleted: false });
+    console.log(`Active cards count: ${activeCount}`);
+    
+    // If no active cards, create them
+    if (activeCount === 0) {
+      await Card.create([
+        { title: 'Modern Design', description: 'Experience the sleek and intuitive interface of our latest product.', faceColor: 'purple' },
+        { title: 'Powerful Performance', description: 'Under the hood, we use cutting-edge technology to ensure speed.', faceColor: 'black' },
+        { title: 'Secure & Reliable', description: 'Your data is protected with industry-leading security standards.', faceColor: 'orange' },
+        { title: 'User Friendly', description: 'Built with the user in mind, making complex tasks simple and intuitive.', faceColor: 'yellow' }
+      ]);
+      console.log('Created new seed data as no active cards found');
+    }
   }
 }
 seedData();
 
 app.get('/api/cards', async (req, res) => {
   try {
-    const cards = await Card.find().sort({ isPinned: -1, _id: -1 });
+    const cards = await Card.find({ isDeleted: false }).sort({ isPinned: -1, _id: -1 });
     res.json(cards);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -66,8 +87,13 @@ app.put('/api/cards/:id', async (req, res) => {
 
 app.delete('/api/cards/:id', async (req, res) => {
   try {
-    await Card.findByIdAndDelete(req.params.id);
-    res.json({ message: 'Card deleted successfully' });
+    // Soft delete - mark as deleted instead of removing from database
+    const card = await Card.findByIdAndUpdate(
+      req.params.id,
+      { isDeleted: true },
+      { new: true }
+    );
+    res.json({ message: 'Card temporarily deleted', card });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
