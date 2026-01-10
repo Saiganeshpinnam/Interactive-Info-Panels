@@ -6,6 +6,8 @@ import ContextMenu from './components/ContextMenu';
 import ViewModal from './components/ViewModal';
 import ImageCardsPanel from './components/FacesPanel';
 
+const API_BASE = import.meta.env.VITE_API_BASE;
+
 function App() {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,12 +20,12 @@ function App() {
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/cards');
+        const response = await axios.get(`${API_BASE}/api/cards`);
         setCards(response.data);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching cards:', err);
-        setError('Failed to load cards. Make sure the backend is running.');
+        setError('Failed to load cards. Backend is not reachable.');
         setLoading(false);
       }
     };
@@ -43,7 +45,6 @@ function App() {
     const card = menuConfig.card;
     if (!card) return;
 
-    // Store previous state for rollback
     const previousCards = [...cards];
 
     if (action === 'pin' || action === 'important') {
@@ -51,34 +52,33 @@ function App() {
         ? { isPinned: !card.isPinned } 
         : { isImportant: !card.isImportant };
 
-      // Optimistic Update
       setCards(prev => prev.map(c => 
         c._id === card._id ? { ...c, ...updateData } : c
       ).sort((a, b) => {
-        // Maintain pinned sorting on frontend
         if (a.isPinned !== b.isPinned) return b.isPinned ? 1 : -1;
         return b._id.localeCompare(a._id);
       }));
 
       try {
-        await axios.put(`http://localhost:5000/api/cards/${card._id}`, updateData);
+        await axios.put(`${API_BASE}/api/cards/${card._id}`, updateData);
       } catch (err) {
         console.error(`Error updating card ${action}:`, err);
         setCards(previousCards);
         alert(`Failed to update card. Reverting changes.`);
       }
-    } else if (action === 'delete') {
-      // Optimistic Update
+    } 
+    else if (action === 'delete') {
       setCards(prev => prev.filter(c => c._id !== card._id));
 
       try {
-        await axios.delete(`http://localhost:5000/api/cards/${card._id}`);
+        await axios.delete(`${API_BASE}/api/cards/${card._id}`);
       } catch (err) {
         console.error('Error deleting card:', err);
         setCards(previousCards);
         alert('Failed to delete card. Reverting changes.');
       }
-    } else if (action === 'view') {
+    } 
+    else if (action === 'view') {
       setViewCard(card);
       setShowViewModal(true);
     }
