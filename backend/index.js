@@ -44,7 +44,7 @@ async function seedData() {
       { title: 'Powerful Performance', description: 'Under the hood, we use cutting-edge technology to ensure speed.', faceColor: 'black' },
       { title: 'Secure & Reliable', description: 'Your data is protected with industry-leading security standards.', faceColor: 'orange' },
       { title: 'User Friendly', description: 'Built with the user in mind, making complex tasks simple and intuitive.', faceColor: 'yellow' },
-       { title: 'User Friendly', description: 'Built with the user in mind, making complex tasks simple and intuitive.', faceColor: 'yellow' }
+      
     ]);
     console.log('Seed data added');
   } else {
