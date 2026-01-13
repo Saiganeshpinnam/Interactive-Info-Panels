@@ -21,17 +21,21 @@ function App() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewCard, setViewCard] = useState(null);
 
+  // ---------------- FETCH CARDS ----------------
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const response = axios.get(`${import.meta.env.VITE_API_URL}/api/cards`);
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/cards`
+        );
 
-        // Support both API formats:
-        // [ {..}, {..} ]
-        // or { count: X, cards: [ {..} ] }
-        const cardsArray = response.data.cards || response.data;
+        // Backend returns array → use directly
+        // Or { cards: [...] } → fallback
+        const cardsArray = Array.isArray(response.data)
+          ? response.data
+          : response.data.cards;
 
-        setCards(cardsArray);
+        setCards(cardsArray || []);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching cards:", err);
@@ -43,6 +47,7 @@ function App() {
     fetchCards();
   }, []);
 
+  // ---------------- CONTEXT MENU ----------------
   const handleContextMenu = (x, y, card) => {
     setMenuConfig({ show: true, x, y, card });
   };
@@ -51,6 +56,7 @@ function App() {
     setMenuConfig((prev) => ({ ...prev, show: false }));
   };
 
+  // ---------------- MENU ACTIONS ----------------
   const handleMenuAction = async (action) => {
     const card = menuConfig.card;
     if (!card) return;
@@ -77,29 +83,31 @@ function App() {
 
       try {
         await axios.put(
-  `${import.meta.env.VITE_API_URL}/api/cards/${card._id}`,
-  updateData
-);
-
+          `${import.meta.env.VITE_API_URL}/api/cards/${card._id}`,
+          updateData
+        );
       } catch (err) {
         console.error("Update failed:", err);
         setCards(previousCards);
         alert("Failed to update card. Reverting.");
       }
-    } else if (action === "delete") {
+    }
+
+    else if (action === "delete") {
       setCards((prev) => prev.filter((c) => c._id !== card._id));
 
       try {
         await axios.delete(
-  `${import.meta.env.VITE_API_URL}/api/cards/${card._id}`
-);
-
+          `${import.meta.env.VITE_API_URL}/api/cards/${card._id}`
+        );
       } catch (err) {
         console.error("Delete failed:", err);
         setCards(previousCards);
         alert("Failed to delete card. Reverting.");
       }
-    } else if (action === "view") {
+    }
+
+    else if (action === "view") {
       setViewCard(card);
       setShowViewModal(true);
     }
@@ -110,6 +118,7 @@ function App() {
     setViewCard(null);
   };
 
+  // ---------------- UI ----------------
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 pb-40">
       <div className="max-w-7xl mx-auto">
@@ -161,7 +170,6 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Infinite auto-scrolling panel */}
       <FacesPanel />
     </div>
   );

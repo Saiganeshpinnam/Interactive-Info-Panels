@@ -9,7 +9,15 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI 
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",                     // for local dev
+    "https://interactive-info-panels.netlify.app/" // your Netlify site
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 app.use(express.json());
 
 mongoose.connect(MONGODB_URI)
