@@ -24,7 +24,7 @@ function App() {
   useEffect(() => {
     const fetchCards = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/cards");
+        const response = axios.get(`${import.meta.env.VITE_API_URL}/api/cards`);
 
         // Support both API formats:
         // [ {..}, {..} ]
@@ -77,9 +77,10 @@ function App() {
 
       try {
         await axios.put(
-          `http://localhost:5000/api/cards/${card._id}`,
-          updateData
-        );
+  `${import.meta.env.VITE_API_URL}/api/cards/${card._id}`,
+  updateData
+);
+
       } catch (err) {
         console.error("Update failed:", err);
         setCards(previousCards);
@@ -90,8 +91,9 @@ function App() {
 
       try {
         await axios.delete(
-          `http://localhost:5000/api/cards/${card._id}`
-        );
+  `${import.meta.env.VITE_API_URL}/api/cards/${card._id}`
+);
+
       } catch (err) {
         console.error("Delete failed:", err);
         setCards(previousCards);
