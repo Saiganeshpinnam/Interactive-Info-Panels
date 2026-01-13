@@ -10,13 +10,21 @@ const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI 
 
 app.use(cors({
-  origin: [
-    "http://localhost:5173",                     // for local dev
-    "https://interactive-info-panels.netlify.app/" // your Netlify site
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (Postman, curl, etc.)
+    if (!origin) return callback(null, true);
+
+    // Allow all Netlify domains
+    if (origin.endsWith(".netlify.app")) return callback(null, true);
+
+    // Allow localhost for development
+    if (origin.startsWith("http://localhost")) return callback(null, true);
+
+    callback(new Error("Not allowed by CORS"));
+  },
   credentials: true
 }));
+
 
 app.use(express.json());
 
